@@ -11,9 +11,6 @@ const allPosts = await Astro.glob("../pages/posts/*.md");
   <ul>
     {
       allPosts.map((post) => (
-        // <li>
-        //   <a href={post.url}>{post.frontmatter.title}</a>
-        // </li>
         <BlogPost postUrl={post.url} postTitle={post.frontmatter.title} />
       ))
     }
