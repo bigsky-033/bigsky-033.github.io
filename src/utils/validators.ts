@@ -13,7 +13,7 @@ export const validateJson = (input: string): { isValid: boolean; error?: string 
 export const isBase64 = (input: string): boolean => {
   try {
     return btoa(atob(input)) === input;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

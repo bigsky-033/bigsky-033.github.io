@@ -5,12 +5,12 @@ export const encodeBase64 = (input: string): string => {
 export const decodeBase64 = (input: string): string => {
   try {
     return decodeURIComponent(escape(atob(input)));
-  } catch (error) {
+  } catch {
     throw new Error('Invalid Base64 string');
   }
 };
 
-export const decodeJWT = (token: string): { header: any; payload: any; signature: string } => {
+export const decodeJWT = (token: string): { header: Record<string, unknown>; payload: Record<string, unknown>; signature: string } => {
   const parts = token.split('.');
   
   if (parts.length !== 3) {
@@ -18,12 +18,12 @@ export const decodeJWT = (token: string): { header: any; payload: any; signature
   }
   
   try {
-    const header = JSON.parse(decodeBase64(parts[0] + '=='.substring(0, (4 - parts[0].length % 4) % 4)));
-    const payload = JSON.parse(decodeBase64(parts[1] + '=='.substring(0, (4 - parts[1].length % 4) % 4)));
+    const header = JSON.parse(decodeBase64(parts[0] + '=='.substring(0, (4 - parts[0].length % 4) % 4))) as Record<string, unknown>;
+    const payload = JSON.parse(decodeBase64(parts[1] + '=='.substring(0, (4 - parts[1].length % 4) % 4))) as Record<string, unknown>;
     const signature = parts[2];
     
     return { header, payload, signature };
-  } catch (error) {
+  } catch {
     throw new Error('Failed to decode JWT token');
   }
 };
@@ -35,7 +35,7 @@ export const encodeURL = (input: string): string => {
 export const decodeURL = (input: string): string => {
   try {
     return decodeURIComponent(input);
-  } catch (error) {
+  } catch {
     throw new Error('Invalid URL encoded string');
   }
 };
