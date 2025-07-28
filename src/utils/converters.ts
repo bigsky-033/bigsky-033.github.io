@@ -281,26 +281,26 @@ export const textToEscapeSequences = (text: string): string => {
     .replace(/"/g, '\\"')
     .replace(/'/g, "\\'")
     .replace(/\f/g, '\\f')
-    .replace(/\b/g, '\\b')
+    .replace(/\x08/g, '\\b')
     .replace(/\v/g, '\\v')
     .replace(/\0/g, '\\0');
 };
 
 export const escapeSequencesToText = (text: string): string => {
-  return text.replace(/\\n/g, '\n')
+  return text.replace(/\\u([0-9A-Fa-f]{4,6})/g, (_, hex) => {
+      const codePoint = parseInt(hex, 16);
+      return codePoint > 0xFFFF ? String.fromCodePoint(codePoint) : String.fromCharCode(codePoint);
+    })
+    .replace(/\\x([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\n/g, '\n')
     .replace(/\\r/g, '\r')
     .replace(/\\t/g, '\t')
     .replace(/\\"/g, '"')
     .replace(/\\'/g, "'")
     .replace(/\\f/g, '\f')
-    .replace(/\\b/g, '\b')
+    .replace(/\\b/g, '\x08')
     .replace(/\\v/g, '\v')
     .replace(/\\0/g, '\0')
-    .replace(/\\u([0-9A-Fa-f]{4,6})/g, (_, hex) => {
-      const codePoint = parseInt(hex, 16);
-      return codePoint > 0xFFFF ? String.fromCodePoint(codePoint) : String.fromCharCode(codePoint);
-    })
-    .replace(/\\x([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
     .replace(/\\\\/g, '\\');
 };
 

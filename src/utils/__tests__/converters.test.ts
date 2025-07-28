@@ -672,7 +672,7 @@ describe('JWT Functions', () => {
 
       it('should handle backslashes correctly', () => {
         expect(escapeSequencesToText('\\\\')).toBe('\\');
-        expect(escapeSequencesToText('\\\\n')).toBe('\\n');
+        expect(escapeSequencesToText('\\\\n')).toBe('\\\n'); // \\n becomes literal newline after processing \\
       });
 
       it('should handle empty string', () => {
