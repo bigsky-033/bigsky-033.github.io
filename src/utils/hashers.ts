@@ -23,17 +23,36 @@ export const generateSHAHash = async (
   algorithm: 'SHA-1' | 'SHA-256' | 'SHA-512',
   input: string | ArrayBuffer
 ): Promise<string> => {
-  let data: ArrayBuffer;
-  
-  if (input instanceof ArrayBuffer) {
-    data = input;
-  } else {
-    data = new TextEncoder().encode(input);
-  }
+  // Check if we're in a browser environment with crypto.subtle
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    let data: ArrayBuffer;
+    
+    if (input instanceof ArrayBuffer) {
+      data = input;
+    } else {
+      data = new TextEncoder().encode(input);
+    }
 
-  const hashBuffer = await crypto.subtle.digest(algorithm, data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const hashBuffer = await crypto.subtle.digest(algorithm, data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  
+  // Fallback for Node.js environment (like CI) using crypto-js
+  const inputStr = input instanceof ArrayBuffer 
+    ? Array.from(new Uint8Array(input)).map(b => String.fromCharCode(b)).join('')
+    : input;
+    
+  switch (algorithm) {
+    case 'SHA-1':
+      return CryptoJS.SHA1(inputStr).toString();
+    case 'SHA-256':
+      return CryptoJS.SHA256(inputStr).toString();
+    case 'SHA-512':
+      return CryptoJS.SHA512(inputStr).toString();
+    default:
+      throw new Error(`Unsupported algorithm: ${algorithm}`);
+  }
 };
 
 /**
