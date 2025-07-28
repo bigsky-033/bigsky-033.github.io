@@ -12,6 +12,7 @@ const tools: Tool[] = [
   { id: 'jwt-decoder', name: 'JWT Decoder', icon: '🔐', priority: 'P0' },
   { id: 'base64-tool', name: 'Base64 Encoder/Decoder', icon: '📝', priority: 'P0' },
   { id: 'url-encoder', name: 'URL Encoder/Decoder', icon: '🔗', priority: 'P1' },
+  { id: 'ascii-unicode-converter', name: 'ASCII/Unicode Converter', icon: '🔤', priority: 'P0' },
   { id: 'hash-generator', name: 'Hash Generator', icon: '#️⃣', priority: 'P1' },
   { id: 'uuid-generator', name: 'UUID Generator', icon: '🆔', priority: 'P1' },
   { id: 'timestamp-converter', name: 'Unix Timestamp', icon: '⏰', priority: 'P1' },

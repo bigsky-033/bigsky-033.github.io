@@ -1,5 +1,33 @@
 import { describe, it, expect } from 'vitest';
-import { decodeJWT, formatJWTMetadata, isJWTExpired, encodeBase64, decodeBase64, encodeBase64UrlSafe, decodeBase64UrlSafe, detectBase64Type, encodeURL, decodeURL, encodeURIFull, decodeURIFull, parseQueryString, buildQueryString, isValidURL, detectURLEncoding } from '../converters';
+import { 
+  decodeJWT, 
+  formatJWTMetadata, 
+  isJWTExpired, 
+  encodeBase64, 
+  decodeBase64, 
+  encodeBase64UrlSafe, 
+  decodeBase64UrlSafe, 
+  detectBase64Type, 
+  encodeURL, 
+  decodeURL, 
+  encodeURIFull, 
+  decodeURIFull, 
+  parseQueryString, 
+  buildQueryString, 
+  isValidURL, 
+  detectURLEncoding,
+  textToAsciiCodes,
+  asciiCodesToText,
+  textToUnicodeCodes,
+  unicodeCodesToText,
+  textToEscapeSequences,
+  escapeSequencesToText,
+  textToHtmlEntities,
+  htmlEntitiesToText,
+  analyzeCharacterFrequency,
+  detectTextEncoding,
+  getCharacterInfo
+} from '../converters';
 
 // Helper function to create a test JWT using btoa directly for more reliable encoding
 const createTestJWT = (header: object, payload: object, signature = 'test-signature') => {
@@ -458,6 +486,500 @@ describe('JWT Functions', () => {
         const parsedParams = parseQueryString(queryString);
 
         expect(parsedParams).toEqual(originalParams);
+      });
+    });
+  });
+
+  describe('ASCII/Unicode Functions', () => {
+    describe('textToAsciiCodes', () => {
+      it('should convert text to decimal ASCII codes', () => {
+        expect(textToAsciiCodes('Hello', 'decimal')).toEqual(['72', '101', '108', '108', '111']);
+        expect(textToAsciiCodes('A', 'decimal')).toEqual(['65']);
+        expect(textToAsciiCodes('!', 'decimal')).toEqual(['33']);
+      });
+
+      it('should convert text to hexadecimal ASCII codes', () => {
+        expect(textToAsciiCodes('Hello', 'hex')).toEqual(['48', '65', '6C', '6C', '6F']);
+        expect(textToAsciiCodes('A', 'hex')).toEqual(['41']);
+        expect(textToAsciiCodes('z', 'hex')).toEqual(['7A']);
+      });
+
+      it('should convert text to octal ASCII codes', () => {
+        expect(textToAsciiCodes('Hello', 'octal')).toEqual(['110', '145', '154', '154', '157']);
+        expect(textToAsciiCodes('A', 'octal')).toEqual(['101']);
+      });
+
+      it('should convert text to binary ASCII codes', () => {
+        expect(textToAsciiCodes('Hi', 'binary')).toEqual(['1001000', '1101001']);
+        expect(textToAsciiCodes('A', 'binary')).toEqual(['1000001']);
+      });
+
+      it('should handle empty string', () => {
+        expect(textToAsciiCodes('', 'decimal')).toEqual([]);
+      });
+
+      it('should handle special characters', () => {
+        expect(textToAsciiCodes(' ', 'decimal')).toEqual(['32']);
+        expect(textToAsciiCodes('\n', 'decimal')).toEqual(['10']);
+        expect(textToAsciiCodes('\t', 'decimal')).toEqual(['9']);
+      });
+    });
+
+    describe('asciiCodesToText', () => {
+      it('should convert decimal ASCII codes to text', () => {
+        expect(asciiCodesToText(['72', '101', '108', '108', '111'], 'decimal')).toBe('Hello');
+        expect(asciiCodesToText(['65'], 'decimal')).toBe('A');
+        expect(asciiCodesToText(['33'], 'decimal')).toBe('!');
+      });
+
+      it('should convert hexadecimal ASCII codes to text', () => {
+        expect(asciiCodesToText(['48', '65', '6C', '6C', '6F'], 'hex')).toBe('Hello');
+        expect(asciiCodesToText(['41'], 'hex')).toBe('A');
+        expect(asciiCodesToText(['7A'], 'hex')).toBe('z');
+      });
+
+      it('should convert octal ASCII codes to text', () => {
+        expect(asciiCodesToText(['110', '145', '154', '154', '157'], 'octal')).toBe('Hello');
+        expect(asciiCodesToText(['101'], 'octal')).toBe('A');
+      });
+
+      it('should convert binary ASCII codes to text', () => {
+        expect(asciiCodesToText(['1001000', '1101001'], 'binary')).toBe('Hi');
+        expect(asciiCodesToText(['1000001'], 'binary')).toBe('A');
+      });
+
+      it('should handle invalid codes gracefully', () => {
+        expect(asciiCodesToText(['invalid'], 'decimal')).toBe('');
+        expect(asciiCodesToText(['72', 'invalid', '108'], 'decimal')).toBe('Hl');
+      });
+
+      it('should handle empty array', () => {
+        expect(asciiCodesToText([], 'decimal')).toBe('');
+      });
+    });
+
+    describe('textToUnicodeCodes', () => {
+      it('should convert text to Unicode code points', () => {
+        expect(textToUnicodeCodes('Hello')).toEqual(['U+0048', 'U+0065', 'U+006C', 'U+006C', 'U+006F']);
+        expect(textToUnicodeCodes('A')).toEqual(['U+0041']);
+      });
+
+      it('should handle Unicode characters and emojis', () => {
+        expect(textToUnicodeCodes('🌟')).toEqual(['U+1F31F']);
+        expect(textToUnicodeCodes('世')).toEqual(['U+4E16']);
+        expect(textToUnicodeCodes('界')).toEqual(['U+754C']);
+      });
+
+      it('should handle empty string', () => {
+        expect(textToUnicodeCodes('')).toEqual([]);
+      });
+
+      it('should handle mixed ASCII and Unicode', () => {
+        const result = textToUnicodeCodes('A🌟');
+        expect(result).toEqual(['U+0041', 'U+1F31F']);
+      });
+    });
+
+    describe('unicodeCodesToText', () => {
+      it('should convert Unicode code points to text', () => {
+        expect(unicodeCodesToText(['U+0048', 'U+0065', 'U+006C', 'U+006C', 'U+006F'])).toBe('Hello');
+        expect(unicodeCodesToText(['U+0041'])).toBe('A');
+      });
+
+      it('should handle Unicode characters and emojis', () => {
+        expect(unicodeCodesToText(['U+1F31F'])).toBe('🌟');
+        expect(unicodeCodesToText(['U+4E16'])).toBe('世');
+        expect(unicodeCodesToText(['U+754C'])).toBe('界');
+      });
+
+      it('should handle plain hex numbers without U+ prefix', () => {
+        expect(unicodeCodesToText(['41'])).toBe('A');
+        expect(unicodeCodesToText(['1F31F'])).toBe('🌟');
+      });
+
+      it('should handle mixed formats', () => {
+        expect(unicodeCodesToText(['U+0041', '1F31F'])).toBe('A🌟');
+      });
+
+      it('should handle invalid codes gracefully', () => {
+        expect(unicodeCodesToText(['invalid'])).toBe('');
+        expect(unicodeCodesToText(['U+0041', 'invalid', 'U+0042'])).toBe('AB');
+      });
+
+      it('should handle empty array', () => {
+        expect(unicodeCodesToText([])).toBe('');
+      });
+    });
+
+    describe('textToEscapeSequences', () => {
+      it('should convert text to escape sequences', () => {
+        expect(textToEscapeSequences('Hello\nWorld')).toBe('Hello\\nWorld');
+        expect(textToEscapeSequences('Tab\tHere')).toBe('Tab\\tHere');
+        expect(textToEscapeSequences('Quote"Me')).toBe('Quote\\"Me');
+      });
+
+      it('should handle all common escape characters', () => {
+        expect(textToEscapeSequences('\n')).toBe('\\n');
+        expect(textToEscapeSequences('\r')).toBe('\\r');
+        expect(textToEscapeSequences('\t')).toBe('\\t');
+        expect(textToEscapeSequences('"')).toBe('\\"');
+        expect(textToEscapeSequences("'")).toBe("\\'");
+        expect(textToEscapeSequences('\f')).toBe('\\f');
+        expect(textToEscapeSequences('\b')).toBe('\\b');
+        expect(textToEscapeSequences('\v')).toBe('\\v');
+        expect(textToEscapeSequences('\0')).toBe('\\0');
+      });
+
+      it('should handle backslashes correctly', () => {
+        expect(textToEscapeSequences('\\')).toBe('\\\\');
+        expect(textToEscapeSequences('\\n')).toBe('\\\\n');
+      });
+
+      it('should handle empty string', () => {
+        expect(textToEscapeSequences('')).toBe('');
+      });
+
+      it('should handle complex strings', () => {
+        expect(textToEscapeSequences('Hello\n\tWorld\r\n"Test"')).toBe('Hello\\n\\tWorld\\r\\n\\"Test\\"');
+      });
+    });
+
+    describe('escapeSequencesToText', () => {
+      it('should convert escape sequences to text', () => {
+        expect(escapeSequencesToText('Hello\\nWorld')).toBe('Hello\nWorld');
+        expect(escapeSequencesToText('Tab\\tHere')).toBe('Tab\tHere');
+        expect(escapeSequencesToText('Quote\\"Me')).toBe('Quote"Me');
+      });
+
+      it('should handle all common escape sequences', () => {
+        expect(escapeSequencesToText('\\n')).toBe('\n');
+        expect(escapeSequencesToText('\\r')).toBe('\r');
+        expect(escapeSequencesToText('\\t')).toBe('\t');
+        expect(escapeSequencesToText('\\"')).toBe('"');
+        expect(escapeSequencesToText("\\\'")).toBe("'");
+        expect(escapeSequencesToText('\\f')).toBe('\f');
+        expect(escapeSequencesToText('\\b')).toBe('\b');
+        expect(escapeSequencesToText('\\v')).toBe('\v');
+        expect(escapeSequencesToText('\\0')).toBe('\0');
+      });
+
+      it('should handle Unicode escape sequences', () => {
+        expect(escapeSequencesToText('\\u0041')).toBe('A');
+        expect(escapeSequencesToText('\\u1F31F')).toBe('🌟');
+        expect(escapeSequencesToText('\\x41')).toBe('A');
+        expect(escapeSequencesToText('\\x7A')).toBe('z');
+      });
+
+      it('should handle backslashes correctly', () => {
+        expect(escapeSequencesToText('\\\\')).toBe('\\');
+        expect(escapeSequencesToText('\\\\n')).toBe('\\n');
+      });
+
+      it('should handle empty string', () => {
+        expect(escapeSequencesToText('')).toBe('');
+      });
+
+      it('should handle complex strings', () => {
+        expect(escapeSequencesToText('Hello\\n\\tWorld\\r\\n\\"Test\\"')).toBe('Hello\n\tWorld\r\n"Test"');
+      });
+    });
+
+    describe('textToHtmlEntities', () => {
+      it('should convert text to HTML entities', () => {
+        expect(textToHtmlEntities('<Hello>')).toBe('&lt;Hello&gt;');
+        expect(textToHtmlEntities('A & B')).toBe('A &amp; B');
+        expect(textToHtmlEntities('"Quote"')).toBe('&quot;Quote&quot;');
+        expect(textToHtmlEntities("'Single'")).toBe('&#39;Single&#39;');
+      });
+
+      it('should handle Unicode characters', () => {
+        expect(textToHtmlEntities('©')).toBe('&#169;');
+        expect(textToHtmlEntities('™')).toBe('&#8482;');
+        expect(textToHtmlEntities('世界')).toContain('&#');
+      });
+
+      it('should handle empty string', () => {
+        expect(textToHtmlEntities('')).toBe('');
+      });
+
+      it('should handle complex HTML', () => {
+        expect(textToHtmlEntities('<script>alert("xss")</script>')).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+      });
+    });
+
+    describe('htmlEntitiesToText', () => {
+      it('should convert HTML entities to text', () => {
+        expect(htmlEntitiesToText('&lt;Hello&gt;')).toBe('<Hello>');
+        expect(htmlEntitiesToText('A &amp; B')).toBe('A & B');
+        expect(htmlEntitiesToText('&quot;Quote&quot;')).toBe('"Quote"');
+        expect(htmlEntitiesToText('&#39;Single&#39;')).toBe("'Single'");
+      });
+
+      it('should handle numeric HTML entities', () => {
+        expect(htmlEntitiesToText('&#65;')).toBe('A');
+        expect(htmlEntitiesToText('&#169;')).toBe('©');
+        expect(htmlEntitiesToText('&#8482;')).toBe('™');
+      });
+
+      it('should handle hexadecimal HTML entities', () => {
+        expect(htmlEntitiesToText('&#x41;')).toBe('A');
+        expect(htmlEntitiesToText('&#xA9;')).toBe('©');
+      });
+
+      it('should handle named HTML entities', () => {
+        expect(htmlEntitiesToText('&nbsp;')).toBe('\u00A0');
+        expect(htmlEntitiesToText('&copy;')).toBe('©');
+        expect(htmlEntitiesToText('&reg;')).toBe('®');
+        expect(htmlEntitiesToText('&trade;')).toBe('™');
+        expect(htmlEntitiesToText('&hellip;')).toBe('…');
+        expect(htmlEntitiesToText('&mdash;')).toBe('—');
+        expect(htmlEntitiesToText('&ndash;')).toBe('–');
+        expect(htmlEntitiesToText('&lsquo;')).toBe('\u2018');
+        expect(htmlEntitiesToText('&rsquo;')).toBe('\u2019');
+        expect(htmlEntitiesToText('&ldquo;')).toBe('\u201C');
+        expect(htmlEntitiesToText('&rdquo;')).toBe('\u201D');
+      });
+
+      it('should handle unknown entities gracefully', () => {
+        expect(htmlEntitiesToText('&unknown;')).toBe('&unknown;');
+      });
+
+      it('should handle empty string', () => {
+        expect(htmlEntitiesToText('')).toBe('');
+      });
+
+      it('should handle complex HTML', () => {
+        expect(htmlEntitiesToText('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;')).toBe('<script>alert("xss")</script>');
+      });
+    });
+
+    describe('analyzeCharacterFrequency', () => {
+      it('should analyze character frequency', () => {
+        const result = analyzeCharacterFrequency('hello world');
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ char: 'l', count: 3, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'o', count: 2, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'h', count: 1, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'e', count: 1, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: ' ', count: 1, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'w', count: 1, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'r', count: 1, percentage: expect.any(Number) }),
+            expect.objectContaining({ char: 'd', count: 1, percentage: expect.any(Number) }),
+          ])
+        );
+        
+        // Check that results are sorted by count
+        expect(result[0].count).toBeGreaterThanOrEqual(result[1].count);
+        expect(result[1].count).toBeGreaterThanOrEqual(result[2].count);
+      });
+
+      it('should calculate correct percentages', () => {
+        const result = analyzeCharacterFrequency('aaa');
+        expect(result).toEqual([
+          { char: 'a', count: 3, percentage: 100 }
+        ]);
+      });
+
+      it('should handle empty string', () => {
+        const result = analyzeCharacterFrequency('');
+        expect(result).toEqual([]);
+      });
+
+      it('should handle single character', () => {
+        const result = analyzeCharacterFrequency('a');
+        expect(result).toEqual([
+          { char: 'a', count: 1, percentage: 100 }
+        ]);
+      });
+
+      it('should handle Unicode characters', () => {
+        const result = analyzeCharacterFrequency('🌟🌟A');
+        // Emoji takes 2 UTF-16 code units, so total length is 5, not 3
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ char: '🌟', count: 2, percentage: expect.closeTo(40, 1) }),
+            expect.objectContaining({ char: 'A', count: 1, percentage: expect.closeTo(20, 1) }),
+          ])
+        );
+      });
+    });
+
+    describe('detectTextEncoding', () => {
+      it('should detect ASCII encoding', () => {
+        expect(detectTextEncoding('Hello World')).toBe('ASCII');
+        expect(detectTextEncoding('123456789')).toBe('ASCII');
+        expect(detectTextEncoding('!@#$%^&*()')).toBe('ASCII');
+      });
+
+      it('should detect Extended ASCII/Latin-1', () => {
+        expect(detectTextEncoding('Café')).toBe('Extended ASCII/Latin-1');
+        expect(detectTextEncoding('naïve')).toBe('Extended ASCII/Latin-1');
+      });
+
+      it('should detect UTF-8/UTF-16 for Unicode characters', () => {
+        expect(detectTextEncoding('世界')).toBe('UTF-8/UTF-16 (Unicode)');
+        expect(detectTextEncoding('Здравствуй')).toBe('UTF-8/UTF-16 (Unicode)');
+      });
+
+      it('should detect UTF-8/UTF-16 for emojis', () => {
+        expect(detectTextEncoding('🌟')).toBe('UTF-8/UTF-16 (Unicode)');
+        expect(detectTextEncoding('Hello 🌍!')).toBe('UTF-8/UTF-16 (Unicode)');
+        expect(detectTextEncoding('⭐ ⚡ ✨')).toBe('UTF-8/UTF-16 (Unicode)');
+      });
+
+      it('should handle empty string', () => {
+        expect(detectTextEncoding('')).toBe('ASCII');
+      });
+
+      it('should prioritize Unicode detection', () => {
+        expect(detectTextEncoding('Hello 世界! 🌍')).toBe('UTF-8/UTF-16 (Unicode)');
+      });
+    });
+
+    describe('getCharacterInfo', () => {
+      it('should get info for ASCII printable characters', () => {
+        const info = getCharacterInfo('A');
+        expect(info).toEqual({
+          char: 'A',
+          name: 'Character 65',
+          decimal: 65,
+          hex: '41',
+          octal: '101',
+          binary: '1000001',
+          unicode: 'U+0041',
+          category: 'ASCII Printable'
+        });
+      });
+
+      it('should get info for common named characters', () => {
+        const spaceInfo = getCharacterInfo(' ');
+        expect(spaceInfo.name).toBe('Space');
+        expect(spaceInfo.category).toBe('ASCII Printable');
+
+        const exclamationInfo = getCharacterInfo('!');
+        expect(exclamationInfo.name).toBe('Exclamation Mark');
+
+        const tabInfo = getCharacterInfo('\t');
+        expect(tabInfo.name).toBe('Tab');
+        expect(tabInfo.category).toBe('ASCII Control');
+
+        const newlineInfo = getCharacterInfo('\n');
+        expect(newlineInfo.name).toBe('Line Feed');
+        expect(newlineInfo.category).toBe('ASCII Control');
+
+        const nullInfo = getCharacterInfo('\0');
+        expect(nullInfo.name).toBe('Null');
+        expect(nullInfo.category).toBe('ASCII Control');
+      });
+
+      it('should get info for Unicode characters', () => {
+        const info = getCharacterInfo('世');
+        expect(info).toEqual({
+          char: '世',
+          name: 'Character 19990',
+          decimal: 19990,
+          hex: '4E16',
+          octal: '47026',
+          binary: '100111000010110',
+          unicode: 'U+4E16',
+          category: 'Unicode'
+        });
+      });
+
+      it('should get info for emojis', () => {
+        const info = getCharacterInfo('🌟');
+        expect(info.char).toBe('🌟');
+        expect(info.decimal).toBe(127775);
+        expect(info.hex).toBe('1F31F');
+        expect(info.unicode).toBe('U+1F31F');
+        expect(info.category).toBe('Unicode');
+      });
+
+      it('should categorize ASCII control characters', () => {
+        const controlInfo = getCharacterInfo('\x01');
+        expect(controlInfo.category).toBe('ASCII Control');
+        expect(controlInfo.decimal).toBe(1);
+      });
+
+      it('should categorize extended ASCII characters', () => {
+        const extendedInfo = getCharacterInfo('€');
+        expect(extendedInfo.category).toBe('Unicode'); // Euro sign is actually Unicode, not extended ASCII
+      });
+    });
+
+    describe('ASCII/Unicode roundtrip tests', () => {
+      it('should maintain data integrity through ASCII encode/decode cycles', () => {
+        const testStrings = [
+          'Hello World!',
+          'ASCII test 123',
+          'Special chars: !@#$%^&*()',
+          'Mixed: ABC123xyz',
+          'Single char: A',
+          ''
+        ];
+
+        testStrings.forEach(text => {
+          // Test all ASCII formats
+          ['decimal', 'hex', 'octal', 'binary'].forEach(format => {
+            const codes = textToAsciiCodes(text, format as 'decimal' | 'hex' | 'octal' | 'binary');
+            const decoded = asciiCodesToText(codes, format as 'decimal' | 'hex' | 'octal' | 'binary');
+            expect(decoded).toBe(text);
+          });
+        });
+      });
+
+      it('should maintain data integrity through Unicode encode/decode cycles', () => {
+        const testStrings = [
+          'Hello World!',
+          'Unicode: 世界',
+          'Emoji: 🌟🚀✨',
+          'Mixed: Hello 世界! 🌟',
+          'A',
+          ''
+        ];
+
+        testStrings.forEach(text => {
+          const codes = textToUnicodeCodes(text);
+          const decoded = unicodeCodesToText(codes);
+          expect(decoded).toBe(text);
+        });
+      });
+
+      it('should maintain data integrity through escape sequence cycles', () => {
+        const testStrings = [
+          'Hello\nWorld',
+          'Tab\tTest',
+          'Quote"Test"',
+          "Single'Quote",
+          'Complex:\n\t"Test"\r\n',
+          'Backslash\\Test',
+          ''
+        ];
+
+        testStrings.forEach(text => {
+          const escaped = textToEscapeSequences(text);
+          const unescaped = escapeSequencesToText(escaped);
+          expect(unescaped).toBe(text);
+        });
+      });
+
+      it('should maintain data integrity through HTML entity cycles', () => {
+        const testStrings = [
+          '<Hello>',
+          'A & B',
+          '"Quote"',
+          "'Single'",
+          '<script>alert("test")</script>',
+          'Mixed: <div>Hello & "World"</div>',
+          ''
+        ];
+
+        testStrings.forEach(text => {
+          const entities = textToHtmlEntities(text);
+          const decoded = htmlEntitiesToText(entities);
+          expect(decoded).toBe(text);
+        });
       });
     });
   });

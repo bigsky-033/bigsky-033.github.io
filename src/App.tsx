@@ -5,6 +5,7 @@ import JsonFormatter from './components/tools/JsonFormatter/JsonFormatter';
 import JwtDecoder from './components/tools/JwtDecoder/JwtDecoder';
 import Base64Tool from './components/tools/Base64Tool/Base64Tool';
 import UrlEncoder from './components/tools/UrlEncoder/UrlEncoder';
+import AsciiUnicodeConverter from './components/tools/AsciiUnicodeConverter/AsciiUnicodeConverter';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
               <Route path="/jwt-decoder" element={<JwtDecoder />} />
               <Route path="/base64-tool" element={<Base64Tool />} />
               <Route path="/url-encoder" element={<UrlEncoder />} />
+              <Route path="/ascii-unicode-converter" element={<AsciiUnicodeConverter />} />
               <Route path="/hash-generator" element={
                 <div className="flex items-center justify-center h-[calc(100vh-81px)]">
                   <div className="text-center p-8">
