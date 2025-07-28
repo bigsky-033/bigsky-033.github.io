@@ -1,69 +1,81 @@
-# React + TypeScript + Vite
+# DevTools Suite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Privacy-first developer utilities that run entirely in your browser
 
-Currently, two official plugins are available:
+[![Deploy to GitHub Pages](https://github.com/bigsky-033/bigsky-033.github.io/actions/workflows/deploy.yml/badge.svg)](https://github.com/bigsky-033/bigsky-033.github.io/actions/workflows/deploy.yml)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔒 Privacy First
 
-## Expanding the ESLint configuration
+All processing happens in your browser. **No data ever leaves your device.**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🛠 Available Tools
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### ✅ Currently Available
+- **JSON Formatter** - Format, validate, minify, and sort JSON with syntax highlighting
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 🚧 Coming Soon
+- **JWT Decoder** - Decode JWT tokens and display claims
+- **Base64 Encoder/Decoder** - Encode and decode Base64 strings
+- **URL Encoder/Decoder** - URL component encoding/decoding
+- **Hash Generator** - Generate MD5, SHA-1, SHA-256, SHA-512 hashes
+- **UUID Generator** - Generate v4 UUIDs
+- **Unix Timestamp Converter** - Convert timestamps to human-readable dates
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Features
+
+- **100% Client-Side** - No server processing, works offline
+- **Modern Interface** - Clean design with Inter font
+- **Developer-Focused** - Optimized for actual development workflows
+- **Fast & Responsive** - Built with React + TypeScript + Vite
+- **Hash-Based Routing** - Direct links to specific tools
+
+## 🏗 Tech Stack
+
+- **Framework**: React 18 + TypeScript
+- **Styling**: Tailwind CSS
+- **Build**: Vite
+- **Testing**: Vitest + React Testing Library
+- **Deployment**: GitHub Pages
+
+## 🔧 Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run tests
+npm run test
+
+# Build for production
+npm run build
+
+# Lint code
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📦 Deployment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The project automatically deploys to GitHub Pages on push to `main` branch. The deployment workflow includes:
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1. ✅ ESLint checks
+2. ✅ Test suite execution  
+3. ✅ Production build
+4. 🚀 Deploy to GitHub Pages
+
+## 🤝 Contributing
+
+This is a personal project, but feel free to:
+- Report bugs or issues
+- Suggest new developer tools
+- Submit improvements
+
+## 📄 License
+
+MIT License - Feel free to use this project as a reference for your own developer tools.
+
+---
+
+**Live Site**: [https://bigsky-033.github.io](https://bigsky-033.github.io)

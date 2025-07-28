@@ -41,6 +41,20 @@ npm run test:coverage
 npm run preview
 ```
 
+## Deployment
+
+The project is configured for GitHub Pages deployment:
+
+- **Repository**: Should be named `username.github.io` for user sites
+- **Deployment**: Automated via GitHub Actions on push to `main` branch
+- **Base URL**: Set to `/` for user GitHub Pages sites
+- **Live URL**: `https://username.github.io/`
+
+### GitHub Pages Setup
+1. Repository Settings → Pages → Source: "GitHub Actions"
+2. Workflow automatically builds and deploys on push to main
+3. Deployment includes linting, testing, and building steps
+
 ## Project Structure
 
 ```
@@ -94,8 +108,8 @@ Uses React Router with hash-based routing for GitHub Pages compatibility:
 - Performance target: tool switching < 100ms, operations < 50ms
 - Support Chrome/Edge, Firefox, Safari (last 2 versions)
 - WCAG 2.1 AA accessibility compliance
-- Mobile-responsive design with dark/light theme support
-- Vite base path set to `/devtools-project/` for GitHub Pages
+- Mobile-responsive design with clean, modern interface
+- Vite base path set to `/` for user GitHub Pages sites
 
 ## Utility Functions
 

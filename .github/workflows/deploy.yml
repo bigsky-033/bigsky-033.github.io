@@ -38,12 +38,6 @@ jobs:
     - name: Build
       run: npm run build
       
-    - name: List build output
-      run: ls -la dist/
-      
-    - name: Show built index.html content
-      run: cat dist/index.html
-      
     - name: Setup Pages
       if: github.ref == 'refs/heads/main'
       uses: actions/configure-pages@v4
