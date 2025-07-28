@@ -10,6 +10,68 @@ export const decodeBase64 = (input: string): string => {
   }
 };
 
+export const encodeBase64UrlSafe = (input: string): string => {
+  return encodeBase64(input).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+};
+
+export const decodeBase64UrlSafe = (input: string): string => {
+  try {
+    // Add padding if needed
+    let padded = input.replace(/-/g, '+').replace(/_/g, '/');
+    const padding = 4 - (padded.length % 4);
+    if (padding !== 4) {
+      padded += '='.repeat(padding);
+    }
+    return decodeBase64(padded);
+  } catch {
+    throw new Error('Invalid URL-safe Base64 string');
+  }
+};
+
+export const detectBase64Type = (input: string): 'standard' | 'url-safe' | 'invalid' => {
+  if (!input || input.length < 4) {
+    return 'invalid';
+  }
+  
+  // Check for standard Base64 first (contains +, /, or = characters)
+  if (/[+/=]/.test(input) && /^[A-Za-z0-9+/]+=*$/.test(input)) {
+    try {
+      decodeBase64(input);
+      return 'standard';
+    } catch {
+      return 'invalid';
+    }
+  }
+  
+  // Check for URL-safe Base64 (no +, /, or = characters, but contains - or _)
+  if (/[-_]/.test(input) && /^[A-Za-z0-9_-]+$/.test(input)) {
+    try {
+      decodeBase64UrlSafe(input);
+      return 'url-safe';
+    } catch {
+      return 'invalid';
+    }
+  }
+  
+  // Check if it could be either (only contains A-Za-z0-9)
+  if (/^[A-Za-z0-9]+$/.test(input)) {
+    // Try standard first, then URL-safe
+    try {
+      decodeBase64(input);
+      return 'standard';
+    } catch {
+      try {
+        decodeBase64UrlSafe(input);
+        return 'url-safe';
+      } catch {
+        return 'invalid';
+      }
+    }
+  }
+  
+  return 'invalid';
+};
+
 export const decodeJWT = (token: string): { header: Record<string, unknown>; payload: Record<string, unknown>; signature: string } => {
   const parts = token.split('.');
   

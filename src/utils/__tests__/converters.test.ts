@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { decodeJWT, formatJWTMetadata, isJWTExpired } from '../converters';
+import { decodeJWT, formatJWTMetadata, isJWTExpired, encodeBase64, decodeBase64, encodeBase64UrlSafe, decodeBase64UrlSafe, detectBase64Type } from '../converters';
 
 // Helper function to create a test JWT using btoa directly for more reliable encoding
 const createTestJWT = (header: object, payload: object, signature = 'test-signature') => {
@@ -132,6 +132,123 @@ describe('JWT Functions', () => {
 
       // Should be expired since we check >= 
       expect(isJWTExpired(payload)).toBe(true);
+    });
+  });
+
+  describe('Base64 Functions', () => {
+    describe('encodeBase64', () => {
+      it('should encode text to Base64', () => {
+        expect(encodeBase64('Hello World!')).toBe('SGVsbG8gV29ybGQh');
+        expect(encodeBase64('test')).toBe('dGVzdA==');
+      });
+
+      it('should handle Unicode characters', () => {
+        expect(encodeBase64('🌟 Hello 世界! 🚀')).toBeTruthy();
+        // Verify roundtrip
+        const encoded = encodeBase64('🌟 Hello 世界! 🚀');
+        expect(decodeBase64(encoded)).toBe('🌟 Hello 世界! 🚀');
+      });
+
+      it('should handle empty string', () => {
+        expect(encodeBase64('')).toBe('');
+      });
+    });
+
+    describe('decodeBase64', () => {
+      it('should decode Base64 to text', () => {
+        expect(decodeBase64('SGVsbG8gV29ybGQh')).toBe('Hello World!');
+        expect(decodeBase64('dGVzdA==')).toBe('test');
+      });
+
+      it('should throw error for invalid Base64', () => {
+        expect(() => decodeBase64('invalid-base64!@#')).toThrow('Invalid Base64 string');
+      });
+
+      it('should handle empty string', () => {
+        expect(decodeBase64('')).toBe('');
+      });
+    });
+
+    describe('encodeBase64UrlSafe', () => {
+      it('should encode text to URL-safe Base64', () => {
+        const text = 'Hello>World?';
+        const encoded = encodeBase64UrlSafe(text);
+        expect(encoded).toBe('SGVsbG8-V29ybGQ_');
+        expect(encoded).not.toContain('+');
+        expect(encoded).not.toContain('/');
+        expect(encoded).not.toContain('=');
+      });
+
+      it('should handle text that produces standard Base64 with padding', () => {
+        const encoded = encodeBase64UrlSafe('test');
+        expect(encoded).toBe('dGVzdA'); // No padding
+      });
+    });
+
+    describe('decodeBase64UrlSafe', () => {
+      it('should decode URL-safe Base64 to text', () => {
+        expect(decodeBase64UrlSafe('SGVsbG8-V29ybGQ_')).toBe('Hello>World?');
+        expect(decodeBase64UrlSafe('dGVzdA')).toBe('test');
+      });
+
+      it('should throw error for invalid URL-safe Base64', () => {
+        expect(() => decodeBase64UrlSafe('invalid+base64=')).toThrow('Invalid URL-safe Base64 string');
+      });
+
+      it('should handle empty string', () => {
+        expect(decodeBase64UrlSafe('')).toBe('');
+      });
+    });
+
+    describe('detectBase64Type', () => {
+      it('should detect standard Base64', () => {
+        expect(detectBase64Type('SGVsbG8gV29ybGQh')).toBe('standard');
+        expect(detectBase64Type('dGVzdA==')).toBe('standard');
+        expect(detectBase64Type('YWJjZGVmZw==')).toBe('standard');
+      });
+
+      it('should detect URL-safe Base64', () => {
+        expect(detectBase64Type('SGVsbG8-V29ybGQ_')).toBe('url-safe');
+        expect(detectBase64Type('dGVzdA')).toBe('standard'); // No special chars, defaults to standard
+      });
+
+      it('should detect invalid Base64', () => {
+        expect(detectBase64Type('invalid-base64!@#')).toBe('invalid');
+        expect(detectBase64Type('hello world')).toBe('invalid');
+        expect(detectBase64Type('')).toBe('invalid');
+      });
+
+      it('should handle edge cases', () => {
+        // Valid characters but invalid Base64
+        expect(detectBase64Type('SGVs')).toBe('standard'); // Valid 4-char Base64
+        expect(detectBase64Type('A')).toBe('invalid'); // Single character
+        expect(detectBase64Type('AB')).toBe('invalid'); // Too short
+        expect(detectBase64Type('ABC')).toBe('invalid'); // Too short
+      });
+    });
+
+    describe('Base64 roundtrip tests', () => {
+      it('should maintain data integrity through encode/decode cycles', () => {
+        const testStrings = [
+          'Hello World!',
+          'Test with spaces and symbols: !@#$%^&*()',
+          '🌟 Unicode test 世界 🚀',
+          '',
+          'a',
+          'abcdefghijklmnopqrstuvwxyz',
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        ];
+
+        testStrings.forEach(text => {
+          // Standard Base64 roundtrip
+          const standardEncoded = encodeBase64(text);
+          expect(decodeBase64(standardEncoded)).toBe(text);
+
+          // URL-safe Base64 roundtrip
+          const urlSafeEncoded = encodeBase64UrlSafe(text);
+          expect(decodeBase64UrlSafe(urlSafeEncoded)).toBe(text);
+        });
+      });
     });
   });
 });
