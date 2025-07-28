@@ -140,3 +140,72 @@ export const decodeURL = (input: string): string => {
     throw new Error('Invalid URL encoded string');
   }
 };
+
+export const encodeURIFull = (input: string): string => {
+  return encodeURI(input);
+};
+
+export const decodeURIFull = (input: string): string => {
+  try {
+    return decodeURI(input);
+  } catch {
+    throw new Error('Invalid URI encoded string');
+  }
+};
+
+export const parseQueryString = (queryString: string): Record<string, string> => {
+  const params: Record<string, string> = {};
+  
+  // Remove leading ? if present
+  const cleanQuery = queryString.startsWith('?') ? queryString.slice(1) : queryString;
+  
+  if (!cleanQuery) return params;
+  
+  const pairs = cleanQuery.split('&');
+  
+  for (const pair of pairs) {
+    const [key, value = ''] = pair.split('=');
+    if (key) {
+      try {
+        params[decodeURIComponent(key)] = decodeURIComponent(value);
+      } catch {
+        // If decoding fails, use raw values
+        params[key] = value;
+      }
+    }
+  }
+  
+  return params;
+};
+
+export const buildQueryString = (params: Record<string, string>): string => {
+  const encoded = Object.entries(params)
+    .filter(([key]) => key !== '') // Don't trim, just check for empty string
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+  
+  return encoded ? `?${encoded}` : '';
+};
+
+export const isValidURL = (input: string): boolean => {
+  try {
+    new URL(input);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const detectURLEncoding = (input: string): 'encoded' | 'decoded' | 'unknown' => {
+  // Check for URL encoded characters like %20, %21, etc.
+  if (/%[0-9A-Fa-f]{2}/.test(input)) {
+    return 'encoded';
+  }
+  
+  // Check for characters that would typically be encoded
+  if (/[ <>"`{}|\\^[\]@#$&()=;+,?]/.test(input)) {
+    return 'decoded';
+  }
+  
+  return 'unknown';
+};

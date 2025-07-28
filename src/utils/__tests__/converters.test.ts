@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { decodeJWT, formatJWTMetadata, isJWTExpired, encodeBase64, decodeBase64, encodeBase64UrlSafe, decodeBase64UrlSafe, detectBase64Type } from '../converters';
+import { decodeJWT, formatJWTMetadata, isJWTExpired, encodeBase64, decodeBase64, encodeBase64UrlSafe, decodeBase64UrlSafe, detectBase64Type, encodeURL, decodeURL, encodeURIFull, decodeURIFull, parseQueryString, buildQueryString, isValidURL, detectURLEncoding } from '../converters';
 
 // Helper function to create a test JWT using btoa directly for more reliable encoding
 const createTestJWT = (header: object, payload: object, signature = 'test-signature') => {
@@ -248,6 +248,216 @@ describe('JWT Functions', () => {
           const urlSafeEncoded = encodeBase64UrlSafe(text);
           expect(decodeBase64UrlSafe(urlSafeEncoded)).toBe(text);
         });
+      });
+    });
+  });
+
+  describe('URL Functions', () => {
+    describe('encodeURL', () => {
+      it('should encode URL components', () => {
+        expect(encodeURL('Hello World!')).toBe('Hello%20World!');
+        expect(encodeURL('test@example.com')).toBe('test%40example.com');
+        expect(encodeURL('special chars: &=?/')).toBe('special%20chars%3A%20%26%3D%3F%2F');
+      });
+
+      it('should handle empty string', () => {
+        expect(encodeURL('')).toBe('');
+      });
+
+      it('should handle Unicode characters', () => {
+        expect(encodeURL('Hello 世界!')).toBeTruthy();
+        // Verify roundtrip
+        const encoded = encodeURL('Hello 世界!');
+        expect(decodeURL(encoded)).toBe('Hello 世界!');
+      });
+    });
+
+    describe('decodeURL', () => {
+      it('should decode URL components', () => {
+        expect(decodeURL('Hello%20World!')).toBe('Hello World!');
+        expect(decodeURL('test%40example.com')).toBe('test@example.com');
+        expect(decodeURL('special%20chars%3A%20%26%3D%3F%2F')).toBe('special chars: &=?/');
+      });
+
+      it('should throw error for invalid URL encoding', () => {
+        expect(() => decodeURL('%ZZ')).toThrow('Invalid URL encoded string');
+      });
+
+      it('should handle empty string', () => {
+        expect(decodeURL('')).toBe('');
+      });
+    });
+
+    describe('encodeURIFull', () => {
+      it('should encode full URIs', () => {
+        expect(encodeURIFull('https://example.com/path with spaces')).toBe('https://example.com/path%20with%20spaces');
+        expect(encodeURIFull('https://example.com/path?query=hello world')).toBe('https://example.com/path?query=hello%20world');
+      });
+
+      it('should preserve URI structure', () => {
+        const uri = 'https://example.com:8080/path?query=value#fragment';
+        const encoded = encodeURIFull(uri);
+        expect(encoded).toContain('https://');
+        expect(encoded).toContain('example.com:8080');
+        expect(encoded).toContain('?query=value');
+        expect(encoded).toContain('#fragment');
+      });
+    });
+
+    describe('decodeURIFull', () => {
+      it('should decode full URIs', () => {
+        expect(decodeURIFull('https://example.com/path%20with%20spaces')).toBe('https://example.com/path with spaces');
+        expect(decodeURIFull('https://example.com/path?query=hello%20world')).toBe('https://example.com/path?query=hello world');
+      });
+
+      it('should throw error for invalid URI encoding', () => {
+        expect(() => decodeURIFull('https://example.com/%ZZ')).toThrow('Invalid URI encoded string');
+      });
+    });
+
+    describe('parseQueryString', () => {
+      it('should parse query string with leading ?', () => {
+        const result = parseQueryString('?name=John&age=30');
+        expect(result).toEqual({ name: 'John', age: '30' });
+      });
+
+      it('should parse query string without leading ?', () => {
+        const result = parseQueryString('name=John&age=30');
+        expect(result).toEqual({ name: 'John', age: '30' });
+      });
+
+      it('should handle URL encoded parameters', () => {
+        const result = parseQueryString('name=John%20Doe&city=New%20York');
+        expect(result).toEqual({ name: 'John Doe', city: 'New York' });
+      });
+
+      it('should handle parameters without values', () => {
+        const result = parseQueryString('flag&name=John');
+        expect(result).toEqual({ flag: '', name: 'John' });
+      });
+
+      it('should handle empty query string', () => {
+        expect(parseQueryString('')).toEqual({});
+        expect(parseQueryString('?')).toEqual({});
+      });
+
+      it('should handle malformed encoding gracefully', () => {
+        const result = parseQueryString('name=John%ZZ&valid=test');
+        expect(result).toEqual({ 'name': 'John%ZZ', valid: 'test' });
+      });
+    });
+
+    describe('buildQueryString', () => {
+      it('should build query string from object', () => {
+        const params = { name: 'John', age: '30' };
+        const result = buildQueryString(params);
+        expect(result).toBe('?name=John&age=30');
+      });
+
+      it('should URL encode parameter values', () => {
+        const params = { name: 'John Doe', city: 'New York' };
+        const result = buildQueryString(params);
+        expect(result).toBe('?name=John%20Doe&city=New%20York');
+      });
+
+      it('should handle empty values', () => {
+        const params = { flag: '', name: 'John' };
+        const result = buildQueryString(params);
+        expect(result).toBe('?flag=&name=John');
+      });
+
+      it('should filter out empty keys but keep space keys', () => {
+        const params = { '': 'value', name: 'John', ' ': 'spaces' };
+        const result = buildQueryString(params);
+        expect(result).not.toContain('=value'); // Empty key should be filtered out
+        expect(result).toContain('name=John');
+        expect(result).toContain('%20=spaces'); // Space key gets encoded
+      });
+
+      it('should return empty string for empty object', () => {
+        expect(buildQueryString({})).toBe('');
+      });
+    });
+
+    describe('isValidURL', () => {
+      it('should validate correct URLs', () => {
+        expect(isValidURL('https://example.com')).toBe(true);
+        expect(isValidURL('http://example.com:8080/path')).toBe(true);
+        expect(isValidURL('https://example.com/path?query=value#fragment')).toBe(true);
+        expect(isValidURL('ftp://files.example.com')).toBe(true);
+      });
+
+      it('should reject invalid URLs', () => {
+        expect(isValidURL('not a url')).toBe(false);
+        expect(isValidURL('example.com')).toBe(false); // Missing protocol
+        expect(isValidURL('https://')).toBe(false); // Incomplete
+        expect(isValidURL('')).toBe(false);
+      });
+    });
+
+    describe('detectURLEncoding', () => {
+      it('should detect encoded URLs', () => {
+        expect(detectURLEncoding('Hello%20World')).toBe('encoded');
+        expect(detectURLEncoding('test%40example.com')).toBe('encoded');
+        expect(detectURLEncoding('%3C%3E')).toBe('encoded');
+      });
+
+      it('should detect decoded URLs', () => {
+        expect(detectURLEncoding('Hello World')).toBe('decoded');
+        expect(detectURLEncoding('test@example.com')).toBe('decoded');
+        expect(detectURLEncoding('<script>')).toBe('decoded');
+        expect(detectURLEncoding('query=value&other=test')).toBe('decoded');
+      });
+
+      it('should return unknown for ambiguous text', () => {
+        expect(detectURLEncoding('HelloWorld')).toBe('unknown');
+        expect(detectURLEncoding('test123')).toBe('unknown');
+        expect(detectURLEncoding('abc-def_ghi')).toBe('unknown');
+      });
+
+      it('should handle empty string', () => {
+        expect(detectURLEncoding('')).toBe('unknown');
+      });
+    });
+
+    describe('URL roundtrip tests', () => {
+      it('should maintain data integrity through encode/decode cycles', () => {
+        const testStrings = [
+          'Hello World!',
+          'test@example.com',
+          'Special chars: &=?/#[]{}',
+          'Unicode: 世界 🌍',
+          'Mixed: Hello 世界! @#$%',
+          '',
+          'a',
+          'query=value&other=test'
+        ];
+
+        testStrings.forEach(text => {
+          // Component encoding roundtrip
+          const componentEncoded = encodeURL(text);
+          expect(decodeURL(componentEncoded)).toBe(text);
+
+          // Full URI encoding roundtrip (for appropriate strings)
+          if (!text.includes('://')) {
+            const fullEncoded = encodeURIFull(text);
+            expect(decodeURIFull(fullEncoded)).toBe(text);
+          }
+        });
+      });
+
+      it('should handle query string roundtrip', () => {
+        const originalParams = {
+          name: 'John Doe',
+          city: 'New York',
+          country: 'USA',
+          flag: ''
+        };
+
+        const queryString = buildQueryString(originalParams);
+        const parsedParams = parseQueryString(queryString);
+
+        expect(parsedParams).toEqual(originalParams);
       });
     });
   });
