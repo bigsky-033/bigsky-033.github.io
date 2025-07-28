@@ -8,6 +8,7 @@ import UrlEncoder from './components/tools/UrlEncoder/UrlEncoder';
 import AsciiUnicodeConverter from './components/tools/AsciiUnicodeConverter/AsciiUnicodeConverter';
 import HashGenerator from './components/tools/HashGenerator/HashGenerator';
 import UuidGenerator from './components/tools/UuidGenerator/UuidGenerator';
+import TimestampConverter from './components/tools/TimestampConverter/TimestampConverter';
 
 function App() {
   return (
@@ -26,15 +27,7 @@ function App() {
               <Route path="/ascii-unicode-converter" element={<AsciiUnicodeConverter />} />
               <Route path="/hash-generator" element={<HashGenerator />} />
               <Route path="/uuid-generator" element={<UuidGenerator />} />
-              <Route path="/timestamp-converter" element={
-                <div className="flex items-center justify-center h-[calc(100vh-81px)]">
-                  <div className="text-center p-8">
-                    <div className="text-6xl mb-4">⏰</div>
-                    <h2 className="text-2xl font-semibold text-gray-700 mb-2">Timestamp Converter</h2>
-                    <p className="text-gray-500">Coming Soon</p>
-                  </div>
-                </div>
-              } />
+              <Route path="/timestamp-converter" element={<TimestampConverter />} />
             </Routes>
           </main>
         </div>
