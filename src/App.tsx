@@ -6,6 +6,7 @@ import JwtDecoder from './components/tools/JwtDecoder/JwtDecoder';
 import Base64Tool from './components/tools/Base64Tool/Base64Tool';
 import UrlEncoder from './components/tools/UrlEncoder/UrlEncoder';
 import AsciiUnicodeConverter from './components/tools/AsciiUnicodeConverter/AsciiUnicodeConverter';
+import HashGenerator from './components/tools/HashGenerator/HashGenerator';
 
 function App() {
   return (
@@ -22,11 +23,12 @@ function App() {
               <Route path="/base64-tool" element={<Base64Tool />} />
               <Route path="/url-encoder" element={<UrlEncoder />} />
               <Route path="/ascii-unicode-converter" element={<AsciiUnicodeConverter />} />
-              <Route path="/hash-generator" element={
+              <Route path="/hash-generator" element={<HashGenerator />} />
+              <Route path="/uuid-generator" element={
                 <div className="flex items-center justify-center h-[calc(100vh-81px)]">
                   <div className="text-center p-8">
-                    <div className="text-6xl mb-4">#️⃣</div>
-                    <h2 className="text-2xl font-semibold text-gray-700 mb-2">Hash Generator</h2>
+                    <div className="text-6xl mb-4">🆔</div>
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-2">UUID Generator</h2>
                     <p className="text-gray-500">Coming Soon</p>
                   </div>
                 </div>
