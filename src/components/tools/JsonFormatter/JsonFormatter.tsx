@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { formatJson, minifyJson, sortJsonKeys } from '../../../utils/formatters';
 import { validateJson } from '../../../utils/validators';
 import CopyButton from '../../common/CopyButton';
 
-const JsonFormatter: React.FC = () => {
+const JsonFormatter = () => {
   const [input, setInput] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');

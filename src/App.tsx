@@ -1,4 +1,3 @@
-import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/common/Header';
 import Sidebar from './components/common/Sidebar';

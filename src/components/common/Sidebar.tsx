@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 interface Tool {
@@ -18,7 +17,7 @@ const tools: Tool[] = [
   { id: 'timestamp-converter', name: 'Unix Timestamp', icon: '⏰', priority: 'P1' },
 ];
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   return (
     <aside className="w-64 bg-white border-r border-gray-200 h-[calc(100vh-81px)] overflow-y-auto shadow-sm">
       <nav className="p-6">
