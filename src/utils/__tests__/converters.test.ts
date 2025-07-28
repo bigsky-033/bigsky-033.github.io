@@ -656,7 +656,7 @@ describe('JWT Functions', () => {
         expect(escapeSequencesToText('\\r')).toBe('\r');
         expect(escapeSequencesToText('\\t')).toBe('\t');
         expect(escapeSequencesToText('\\"')).toBe('"');
-        expect(escapeSequencesToText("\\\'")).toBe("'");
+        expect(escapeSequencesToText("\\'")).toBe("'");
         expect(escapeSequencesToText('\\f')).toBe('\f');
         expect(escapeSequencesToText('\\b')).toBe('\b');
         expect(escapeSequencesToText('\\v')).toBe('\v');

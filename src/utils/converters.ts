@@ -278,8 +278,8 @@ export const textToEscapeSequences = (text: string): string => {
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')
     .replace(/\t/g, '\\t')
-    .replace(/\"/g, '\\"')
-    .replace(/\'/g, "\\'")
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
     .replace(/\f/g, '\\f')
     .replace(/\b/g, '\\b')
     .replace(/\v/g, '\\v')
@@ -359,6 +359,7 @@ export const analyzeCharacterFrequency = (text: string): Array<{ char: string; c
 
 export const detectTextEncoding = (text: string): string => {
   // Simple heuristic-based encoding detection
+  // eslint-disable-next-line no-control-regex
   const hasNonAscii = /[^\x00-\x7F]/.test(text);
   const hasHighUnicode = /[\u0100-\uFFFF]/.test(text);
   const hasEmoji = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(text);

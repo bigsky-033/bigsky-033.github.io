@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   textToAsciiCodes, 
   asciiCodesToText, 
@@ -44,7 +44,7 @@ const AsciiUnicodeConverter = () => {
     adjustTextareaHeight(inputRef.current);
   }, [input]);
 
-  const processConversion = () => {
+  const processConversion = useCallback(() => {
     if (!input.trim()) {
       setResults({});
       setError('');
@@ -108,7 +108,7 @@ const AsciiUnicodeConverter = () => {
       setError(err instanceof Error ? err.message : 'Conversion failed');
       setResults({});
     }
-  };
+  }, [input, mode, codeFormat]);
 
   const handleClear = () => {
     setInput('');
@@ -122,7 +122,7 @@ const AsciiUnicodeConverter = () => {
   // Auto-process when input changes
   useEffect(() => {
     processConversion();
-  }, [input, mode, codeFormat]);
+  }, [input, mode, codeFormat, processConversion]);
 
   const getOutputContent = () => {
     if (mode === 'codes-to-text') {
