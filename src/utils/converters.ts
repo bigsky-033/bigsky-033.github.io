@@ -281,6 +281,7 @@ export const textToEscapeSequences = (text: string): string => {
     .replace(/"/g, '\\"')
     .replace(/'/g, "\\'")
     .replace(/\f/g, '\\f')
+    // eslint-disable-next-line no-control-regex
     .replace(/\x08/g, '\\b')
     .replace(/\v/g, '\\v')
     .replace(/\0/g, '\\0');
