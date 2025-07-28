@@ -1,7 +1,16 @@
 {
   "name": "devtools-suite",
+  "version": "1.0.0",
+  "description": "Privacy-first developer utilities that run entirely in your browser - A learning project built with AI assistance",
+  "keywords": ["developer-tools", "privacy", "jwt", "base64", "hash", "uuid", "timestamp", "json", "ascii", "url-encoder", "ai-learning"],
+  "author": "bigsky033",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bigsky033/bigsky-033.github.io.git"
+  },
+  "homepage": "https://bigsky-033.github.io",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
